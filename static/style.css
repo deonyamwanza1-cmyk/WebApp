@@ -5,11 +5,11 @@
 :root {
     --bg-light: #f3f4f6;
     --card-bg: #ffffff;
-    --text-dark: #111827; /* Darkened to near-black for readability */
-    --text-muted: #4b5563; /* Darkened gray */
-    --primary: #1e3a8a; /* Deep, clear blue */
+    --text-dark: #111827;
+    --text-muted: #4b5563;
+    --primary: #1e3a8a;
     --primary-hover: #1e40af;
-    --border: #cbd5e1; /* Darker border for clear separation */
+    --border: #cbd5e1;
     --accent: #2563eb;
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
@@ -50,12 +50,12 @@ hr {
 /* --- Navigation --- */
 nav {
     display: flex;
-    flex-wrap: wrap; /* Allows links to stack neatly on mobile */
+    flex-wrap: wrap;
     gap: 10px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     padding: 12px 24px;
-    border-radius: 12px; /* Changed from 50px for better mobile wrapping */
+    border-radius: 12px;
     margin-bottom: 30px;
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border);
@@ -109,7 +109,7 @@ input[type="number"],
 select {
     width: 100%;
     padding: 12px 16px;
-    border: 2px solid var(--border); /* Thicker borders for visibility */
+    border: 2px solid var(--border);
     border-radius: 8px;
     font-size: 15px;
     font-family: inherit;
@@ -152,7 +152,7 @@ button:hover {
 /* --- Tables --- */
 table {
     width: 100%;
-    min-width: 800px; /* Forces table to stay readable; triggers scroll on small screens */
+    min-width: 800px;
     border-collapse: collapse;
 }
 
@@ -167,7 +167,6 @@ th {
     padding: 16px;
     border-bottom: 2px solid var(--border);
     text-transform: uppercase;
-    
     position: sticky;
     top: 85px; 
     z-index: 900;
@@ -186,60 +185,34 @@ tr:hover td {
 }
 
 /* --- High-Contrast KPiR Colors --- */
-.kpir-header-green {
-    border-bottom: 4px solid #16a34a !important; /* Thick solid green */
-}
+.kpir-header-green { border-bottom: 4px solid #16a34a !important; }
+.kpir-header-orange { border-bottom: 4px solid #ea580c !important; }
+.kpir-month-col { color: var(--primary) !important; font-weight: 700; }
+.kpir-revenue { background-color: #dcfce7; font-weight: 700; color: #166534; }
+.kpir-cost { background-color: #fee2e2; font-weight: 700; color: #991b1b; }
 
-.kpir-header-orange {
-    border-bottom: 4px solid #ea580c !important; /* Thick solid orange */
-}
+/* --- Wyszukiwarka NIP (Search Results Cards) --- */
+.results-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-top: 30px; margin-bottom: 30px; box-shadow: var(--shadow-md); max-width: 800px; margin-left: auto; margin-right: auto; }
+.results-header { background: var(--primary); color: white; padding: 16px 24px; font-weight: 600; font-size: 1.1rem; margin: 0; text-align: left; }
+.results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; padding: 24px; }
+.data-group { display: flex; flex-direction: column; gap: 6px; }
+.data-group.full-width { grid-column: 1 / -1; }
+.data-label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.data-value { font-size: 1rem; color: var(--text-dark); font-weight: 500; }
+.status-badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 700; background: #dcfce7; color: #166534; width: max-content; }
+.bank-accounts-box { max-height: 120px; overflow-y: auto; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--border); font-family: monospace; font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); word-break: break-all; }
 
-.kpir-month-col {
-    color: var(--primary) !important;
-    font-weight: 700;
-}
+.omitted-section { background: #f8fafc; border: 1px dashed var(--border); border-radius: 12px; padding: 20px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; max-width: 800px; margin-left: auto; margin-right: auto; }
+.omitted-title { font-weight: 600; color: var(--text-dark); font-size: 1rem; margin: 0; text-align: left; }
+.omitted-text { color: var(--text-muted); font-size: 0.9rem; font-style: italic; margin: 0; }
+.blad { background: #fef2f2; color: #b91c1c; padding: 12px 16px; border-radius: 8px; border: 1px solid #f87171; margin: 24px auto; font-weight: 500; text-align: center; max-width: 650px; }
 
-.kpir-revenue {
-    background-color: #dcfce7; /* Clear green tint */
-    font-weight: 700;
-    color: #166534; /* Dark green text */
-}
-
-.kpir-cost {
-    background-color: #fee2e2; /* Clear red tint */
-    font-weight: 700;
-    color: #991b1b; /* Dark red text */
-}
-
-/* --- Mobile Responsiveness (Media Queries) --- */
+/* --- Mobile Responsiveness --- */
 @media (max-width: 768px) {
-    body {
-        padding: 15px; 
-    }
-    
-    nav {
-        padding: 10px;
-        position: static; 
-    }
-    
-    nav a {
-        flex: 1 1 45%; 
-        text-align: center;
-        font-size: 13px;
-    }
-    
-    form {
-        padding: 20px;
-    }
-
-    /* Enables horizontal scrolling ONLY on phones */
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    /* Disables sticky headers on phones to save screen space */
-    th {
-        position: static;
-    }
+    body { padding: 15px; }
+    nav { padding: 10px; position: static; }
+    nav a { flex: 1 1 45%; text-align: center; font-size: 13px; }
+    form { padding: 20px; }
+    .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    th { position: static; }
 }

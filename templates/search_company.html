@@ -3,40 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Szukaj według NIP</title>
+  <title>Wyszukiwarka podmiotów (NIP)</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <style>
-    body { font-family: Arial, sans-serif; background:#f2f4f7; padding:40px; }
-    .box { max-width:800px; margin:0 auto; background:#fff; border-radius:12px; padding:30px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
-    h1 { color:#1a2b6d; margin-top:0; font-size: 1.75rem; }
-    
-    /* Search Bar Styling */
-    .search-row { display: flex; gap: 10px; margin-bottom: 24px; }
-    input[type=text] { flex-grow: 1; padding:12px 16px; font-size:16px; border:1px solid #cbd5e1; border-radius:8px; box-sizing:border-box; }
-    button { background:#1a2b6d; color:#fff; border:none; padding:12px 28px; border-radius:8px; font-size:16px; font-weight: 600; cursor:pointer; transition: background 0.2s; }
-    button:hover { background:#142257; }
-    .blad { background: #fef2f2; color: #b91c1c; padding: 12px 16px; border-radius: 8px; border: 1px solid #f87171; margin-bottom: 24px; font-weight: 500; }
-
-    /* Modern Card UI */
-    .results-card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-top: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-    .results-header { background: #14547f; color: white; padding: 16px 24px; font-weight: 600; font-size: 1.1rem; margin: 0; }
-    
-    /* CSS Grid Layout for Data */
-    .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; padding: 24px; }
-    .data-group { display: flex; flex-direction: column; gap: 6px; }
-    .data-group.full-width { grid-column: 1 / -1; }
-    .data-label { font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-    .data-value { font-size: 1rem; color: #0f172a; font-weight: 500; }
-    
-    /* Badges & Scrollable Areas */
-    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 700; background: #dcfce7; color: #166534; width: max-content; }
-    .bank-accounts-box { max-height: 120px; overflow-y: auto; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #cbd5e1; font-family: monospace; font-size: 0.9rem; line-height: 1.6; color: #334155; word-break: break-all; }
-    
-    /* Omitted / Disabled Sections */
-    .omitted-section { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 20px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-    .omitted-title { font-weight: 600; color: #475569; font-size: 1rem; margin: 0; }
-    .omitted-text { color: #64748b; font-size: 0.9rem; font-style: italic; margin: 0; }
-  </style>
 </head>
 <body>
   <nav>
@@ -48,101 +16,104 @@
     <a href="{{ url_for('company_search.szukaj') }}">Wyszukiwanie NIP</a>
   </nav>
 
-  <div class="box">
-    <h1>Wyszukiwarka podmiotów (NIP)</h1>
-    <form method="post" class="search-row">
-      <input type="text" name="numer" value="{{ wpisany_numer }}" placeholder="Wprowadź NIP (np. 9462575811)" required>
-      <button type="submit">Szukaj</button>
-    </form>
+  <h1>Wyszukiwarka podmiotów (NIP)</h1>
+  
+  <form method="post">
+    <div>
+      <label for="numer">Wprowadź NIP:</label>
+      <input type="text" id="numer" name="numer" value="{{ wpisany_numer }}" placeholder="np. 9462575811" required>
+    </div>
+    <br>
+    <button type="submit">Szukaj</button>
+  </form>
 
-    {% if blad_glowny %}
-      <div class="blad">{{ blad_glowny }}</div>
-    {% endif %}
+  {% if blad_glowny %}
+    <div class="blad">{{ blad_glowny }}</div>
+  {% endif %}
 
-    <!-- Biała Lista VAT (Active Card) -->
-    {% if wynik_vat %}
-      <div class="results-card">
-        <h2 class="results-header">Biała lista podatników VAT</h2>
-        <div class="results-grid">
-          
-          <div class="data-group full-width">
-            <span class="data-label">Nazwa podmiotu</span>
-            <span class="data-value">{{ wynik_vat.name }}</span>
+  <!-- Biała Lista VAT (Active Card) -->
+  {% if wynik_vat %}
+    <div class="results-card">
+      <h2 class="results-header">Biała lista podatników VAT</h2>
+      <div class="results-grid">
+        
+        <div class="data-group full-width">
+          <span class="data-label">Nazwa podmiotu</span>
+          <span class="data-value">{{ wynik_vat.name }}</span>
+        </div>
+
+        <div class="data-group">
+          <span class="data-label">NIP</span>
+          <span class="data-value">{{ wynik_vat.nip }}</span>
+        </div>
+
+        <div class="data-group">
+          <span class="data-label">REGON</span>
+          <span class="data-value">{{ wynik_vat.regon }}</span>
+        </div>
+
+        <div class="data-group">
+          <span class="data-label">Numer KRS</span>
+          <span class="data-value">{{ wynik_vat.krs or '—' }}</span>
+        </div>
+
+        <div class="data-group">
+          <span class="data-label">Status VAT</span>
+          <span class="status-badge">{{ wynik_vat.statusVat }}</span>
+        </div>
+
+        <div class="data-group full-width">
+          <span class="data-label">Adres siedziby</span>
+          <span class="data-value">{{ wynik_vat.workingAddress or wynik_vat.residenceAddress }}</span>
+        </div>
+
+        {% if wynik_vat.accountNumbers %}
+        <div class="data-group full-width">
+          <span class="data-label">Rachunki bankowe ({{ wynik_vat.accountNumbers|length }})</span>
+          <div class="bank-accounts-box">
+            {{ wynik_vat.accountNumbers | join(', ') }}
           </div>
+        </div>
+        {% endif %}
+        
+      </div>
+    </div>
+  {% endif %}
 
-          <div class="data-group">
-            <span class="data-label">NIP</span>
-            <span class="data-value">{{ wynik_vat.nip }}</span>
-          </div>
-
-          <div class="data-group">
-            <span class="data-label">REGON</span>
-            <span class="data-value">{{ wynik_vat.regon }}</span>
-          </div>
-
-          <div class="data-group">
-            <span class="data-label">Numer KRS</span>
-            <span class="data-value">{{ wynik_vat.krs or '—' }}</span>
-          </div>
-
-          <div class="data-group">
-            <span class="data-label">Status VAT</span>
-            <span class="status-badge">{{ wynik_vat.statusVat }}</span>
-          </div>
-
-          <div class="data-group full-width">
-            <span class="data-label">Adres siedziby</span>
-            <span class="data-value">{{ wynik_vat.workingAddress or wynik_vat.residenceAddress }}</span>
-          </div>
-
-          {% if wynik_vat.accountNumbers %}
-          <div class="data-group full-width">
-            <span class="data-label">Rachunki bankowe ({{ wynik_vat.accountNumbers|length }})</span>
-            <div class="bank-accounts-box">
-              {{ wynik_vat.accountNumbers | join(', ') }}
+  <!-- KRS Data Render (If Available) -->
+  {% if wynik_krs %}
+    <div class="results-card">
+      <h2 class="results-header">Dane z Krajowego Rejestru Sądowego (KRS)</h2>
+      <div class="results-grid">
+          {% for klucz, wartosc in wynik_krs.items() %}
+            <div class="data-group {% if wartosc|length > 50 %}full-width{% endif %}">
+              <span class="data-label">{{ klucz }}</span>
+              <span class="data-value">{{ wartosc }}</span>
             </div>
-          </div>
-          {% endif %}
-          
-        </div>
+          {% endfor %}
       </div>
-    {% endif %}
+    </div>
+  {% endif %}
 
-    <!-- KRS Data Render (If Available) -->
-    {% if wynik_krs %}
-      <div class="results-card">
-        <h2 class="results-header">Dane z Krajowego Rejestru Sądowego (KRS)</h2>
-        <div class="results-grid">
-            {% for klucz, wartosc in wynik_krs.items() %}
-              <div class="data-group {% if wartosc|length > 50 %}full-width{% endif %}">
-                <span class="data-label">{{ klucz }}</span>
-                <span class="data-value">{{ wartosc }}</span>
-              </div>
-            {% endfor %}
-        </div>
+  <!-- GUS REGON Omitted State -->
+  {% if not wynik_regon %}
+    <div class="omitted-section">
+      <div>
+        <h3 class="omitted-title">Rejestr REGON (GUS)</h3>
+        <p class="omitted-text">Ta sekcja została pominięta (brak skonfigurowanego klucza API).</p>
       </div>
-    {% endif %}
+    </div>
+  {% endif %}
 
-    <!-- GUS REGON Omitted State -->
-    {% if not wynik_regon %}
-      <div class="omitted-section">
-        <div>
-          <h3 class="omitted-title">Rejestr REGON (GUS)</h3>
-          <p class="omitted-text">Ta sekcja została pominięta (brak skonfigurowanego klucza API).</p>
-        </div>
+  <!-- CEIDG Omitted State -->
+  {% if not wynik_ceidg %}
+    <div class="omitted-section">
+      <div>
+        <h3 class="omitted-title">Baza CEIDG (Działalność gospodarcza)</h3>
+        <p class="omitted-text">Ta sekcja została pominięta (brak skonfigurowanego klucza API).</p>
       </div>
-    {% endif %}
+    </div>
+  {% endif %}
 
-    <!-- CEIDG Omitted State -->
-    {% if not wynik_ceidg %}
-      <div class="omitted-section">
-        <div>
-          <h3 class="omitted-title">Baza CEIDG (Działalność gospodarcza)</h3>
-          <p class="omitted-text">Ta sekcja została pominięta (brak skonfigurowanego klucza API).</p>
-        </div>
-      </div>
-    {% endif %}
-
-  </div>
 </body>
 </html>
