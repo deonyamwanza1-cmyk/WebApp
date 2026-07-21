@@ -8,13 +8,13 @@
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('index') }}">Sales Register</a> | 
-        <a href="{{ url_for('purchases') }}">Purchase Register</a> |
-        <a href="{{ url_for('kpir') }}">KPiR Dashboard</a> |
-        <a href="{{ url_for('search') }}">Wyszukiwanie (Search)</a> |
-        <a href="{{ url_for('contractors') }}">Baza Kontrahentów</a> |
-	<a href="{{ url_for('company_search.szukaj') }}">Wyszukiwanie (Search)</a>
-    </nav>
+  <a href="{{ url_for('index') }}">Rejestr sprzedaży</a> |
+  <a href="{{ url_for('purchases') }}">Rejestr zakupów</a> |
+  <a href="{{ url_for('kpir') }}">KPiR</a> |
+  <a href="{{ url_for('search') }}">Przeszukaj rekordy</a> |
+  <a href="{{ url_for('contractors') }}">Baza Kontrahentów</a> |
+  <a href="{{ url_for('company_search.szukaj') }}">Wyszukiwanie NIP</a>
+</nav>
     <hr>
 
     <h1>Szukaj według NIP (Search by NIP)</h1>
