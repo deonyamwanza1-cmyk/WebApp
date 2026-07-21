@@ -21,6 +21,57 @@ def get_db_connection():
     conn = psycopg2.connect(db_url)
     return conn
 
+def init_db():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # Initialize Sales Table
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS sales (
+            id SERIAL PRIMARY KEY,
+            document_number VARCHAR(100),
+            nip VARCHAR(50),
+            document_date VARCHAR(50),
+            net_amount REAL,
+            vat_rate REAL,
+            vat_amount REAL,
+            gross_amount REAL,
+            kpir_category VARCHAR(100)
+        );
+    ''')
+    
+    # Initialize Purchases Table
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS purchases (
+            id SERIAL PRIMARY KEY,
+            document_number VARCHAR(100),
+            nip VARCHAR(50),
+            document_date VARCHAR(50),
+            net_amount REAL,
+            vat_rate REAL,
+            vat_amount REAL,
+            gross_amount REAL,
+            kpir_category VARCHAR(100)
+        );
+    ''')
+
+    # Initialize Contractors Table
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS contractors (
+            id SERIAL PRIMARY KEY,
+            nip VARCHAR(50),
+            name VARCHAR(255),
+            ksef_id VARCHAR(100)
+        );
+    ''')
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+# Run the initialization function on startup
+init_db()
+
 
 @app.route('/', methods=('GET', 'POST'))
 def index():
@@ -52,19 +103,23 @@ def index():
         vat_amount = net * vat_rate
         gross = net + vat_amount
 
-        # Insert the new record
-        conn.execute('''
+        # Insert the new record using a standard cursor
+        cur = conn.cursor()
+        cur.execute('''
             INSERT INTO sales (document_number, nip, document_date, net_amount, vat_rate, vat_amount, gross_amount, kpir_category)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ''', (doc_num, nip, date, net, vat_rate, vat_amount, gross, category))
         conn.commit()
+        cur.close()
 
         # Redirect prevents form resubmission if the user refreshes the page
         return redirect(url_for('index'))
 
-    # Fetch all records from the sales table to display them
-    # We order by id DESC so the newest entries appear at the top
-    sales_records = conn.execute('SELECT * FROM sales ORDER BY id DESC').fetchall()
+    # Fetch all records from the sales table using the Dictionary Cursor
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute('SELECT * FROM sales ORDER BY id DESC')
+    sales_records = cur.fetchall()
+    cur.close()
     conn.close()
 
     # Pass the records to the HTML template
@@ -102,18 +157,28 @@ def purchases():
         gross = net + vat_amount
 
         # Insert the new record into the purchases table
-        conn.execute('''
+        cur = conn.cursor()
+        cur.execute('''
             INSERT INTO purchases (document_number, nip, document_date, net_amount, vat_rate, vat_amount, gross_amount, kpir_category)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ''', (doc_num, nip, date, net, vat_rate, vat_amount, gross, category))
         conn.commit()
+        cur.close()
 
         # Redirect to prevent form resubmission
         return redirect(url_for('purchases'))
 
     # Fetch all records from the purchases table
-    purchases_records = conn.execute('SELECT * FROM purchases ORDER BY id DESC').fetchall()
-    contractors_list = conn.execute('SELECT nip, name FROM contractors ORDER BY name ASC').fetchall()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute('SELECT * FROM purchases ORDER BY id DESC')
+    purchases_records = cur.fetchall()
+    cur.close()
+
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute('SELECT nip, name FROM contractors ORDER BY name ASC')
+    contractors_list = cur.fetchall()
+    cur.close()
+
     conn.close()
 
     # Pass the records to the purchases HTML template
@@ -123,8 +188,15 @@ def purchases():
 @app.route('/kpir')
 def kpir():
     conn = get_db_connection()
-    sales = conn.execute('SELECT document_date, net_amount, kpir_category FROM sales').fetchall()
-    purchases = conn.execute('SELECT document_date, net_amount, kpir_category FROM purchases').fetchall()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    
+    cur.execute('SELECT document_date, net_amount, kpir_category FROM sales')
+    sales = cur.fetchall()
+    
+    cur.execute('SELECT document_date, net_amount, kpir_category FROM purchases')
+    purchases = cur.fetchall()
+    
+    cur.close()
     conn.close()
 
     # Determine current operational year dynamically from data (defaulting to 2026)
@@ -251,17 +323,23 @@ def search():
         # Grab the NIP entered in the search bar
         search_nip = request.form['nip_search']
 
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        
         # Query the sales table for this exact NIP
-        results_sales = conn.execute(
+        cur.execute(
             'SELECT * FROM sales WHERE nip = %s ORDER BY document_date DESC',
             (search_nip,)
-        ).fetchall()
+        )
+        results_sales = cur.fetchall()
 
         # Query the purchases table for this exact NIP
-        results_purchases = conn.execute(
+        cur.execute(
             'SELECT * FROM purchases WHERE nip = %s ORDER BY document_date DESC',
             (search_nip,)
-        ).fetchall()
+        )
+        results_purchases = cur.fetchall()
+        
+        cur.close()
 
     conn.close()
 
@@ -283,16 +361,22 @@ def contractors():
         name = request.form['name']
         ksef_id = request.form['ksef_id']
 
+        cur = conn.cursor()
         # Insert the new contractor into the database
-        conn.execute('''
+        cur.execute('''
             INSERT INTO contractors (nip, name, ksef_id)
             VALUES (%s, %s, %s)
         ''', (nip, name, ksef_id))
         conn.commit()
+        cur.close()
+        
         return redirect(url_for('contractors'))
 
     # Fetch all saved contractors
-    contractors_records = conn.execute('SELECT * FROM contractors ORDER BY name ASC').fetchall()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute('SELECT * FROM contractors ORDER BY name ASC')
+    contractors_records = cur.fetchall()
+    cur.close()
     conn.close()
 
     return render_template('contractors.html', contractors=contractors_records)
@@ -300,18 +384,26 @@ def contractors():
 @app.route('/delete-sale/<int:id>', methods=['POST'])
 def delete_sale(id):
     conn = get_db_connection()
+    cur = conn.cursor()
+    
     # Execute the SQL command to delete the row matching the unique ID
-    conn.execute('DELETE FROM sales WHERE id = %s', (id,))
+    cur.execute('DELETE FROM sales WHERE id = %s', (id,))
     conn.commit()
+    
+    cur.close()
     conn.close()
     return redirect(url_for('index'))
 
 @app.route('/delete-purchase/<int:id>', methods=['POST'])
 def delete_purchase(id):
     conn = get_db_connection()
+    cur = conn.cursor()
+    
     # Execute the SQL command to delete the row matching the unique ID
-    conn.execute('DELETE FROM purchases WHERE id = %s', (id,))
+    cur.execute('DELETE FROM purchases WHERE id = %s', (id,))
     conn.commit()
+    
+    cur.close()
     conn.close()
     return redirect(url_for('purchases'))
 
