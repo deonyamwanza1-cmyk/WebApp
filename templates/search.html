@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounting App - Wyszukiwanie</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}">Sales Register</a> | 
+        <a href="{{ url_for('purchases') }}">Purchase Register</a> |
+        <a href="{{ url_for('kpir') }}">KPiR Dashboard</a> |
+        <a href="{{ url_for('search') }}">Wyszukiwanie (Search)</a> |
+        <a href="{{ url_for('contractors') }}">Baza Kontrahentów</a> |
+	<a href="{{ url_for('company_search.szukaj') }}">Wyszukiwanie (Search)</a>
+    </nav>
+    <hr>
+
+    <h1>Szukaj według NIP (Search by NIP)</h1>
+    
+    <form method="POST">
+        <div>
+            <label for="nip_search">Wprowadź NIP:</label>
+            <input type="text" id="nip_search" name="nip_search" value="{{ search_nip }}" required>
+            <button type="submit">Szukaj</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <!-- Display Results Only if a Search Was Performed -->
+    {% if search_nip %}
+        <h2>Wyniki dla NIP: {{ search_nip }}</h2>
+        
+        <!-- Sales Results Table -->
+        <h3>Historia Sprzedaży (Sales History)</h3>
+  <div class="table-responsive">
+        <table border="1" cellpadding="8" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Numer dokumentu</th>
+                    <th>Data dokumentu</th>
+                    <th>Kwota netto</th>
+                    <th>Kwota VAT</th>
+                    <th>Kwota brutto</th>
+                    <th>Kategoria KPiR</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in sales %}
+                <tr>
+                    <td>{{ row['document_number'] }}</td>
+                    <td>{{ row['document_date'] }}</td>
+                    <td>{{ row['net_amount'] | round(2) }} PLN</td>
+                    <td>{{ row['vat_amount'] | round(2) }} PLN</td>
+                    <td>{{ row['gross_amount'] | round(2) }} PLN</td>
+                    <td>{{ row['kpir_category'] }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">Brak zapisów (No sales records found for this NIP).</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+  </div>
+
+        <br>
+
+        <!-- Purchases Results Table -->
+        <h3>Historia Zakupów (Purchase History)</h3>
+        <table border="1" cellpadding="8" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Numer dokumentu</th>
+                    <th>Data dokumentu</th>
+                    <th>Kwota netto</th>
+                    <th>Kwota VAT</th>
+                    <th>Kwota brutto</th>
+                    <th>Kategoria KPiR</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in purchases %}
+                <tr>
+                    <td>{{ row['document_number'] }}</td>
+                    <td>{{ row['document_date'] }}</td>
+                    <td>{{ row['net_amount'] | round(2) }} PLN</td>
+                    <td>{{ row['vat_amount'] | round(2) }} PLN</td>
+                    <td>{{ row['gross_amount'] | round(2) }} PLN</td>
+                    <td>{{ row['kpir_category'] }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">Brak zapisów (No purchase records found for this NIP).</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <title>Szukaj według NIP</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body { font-family: Arial, sans-serif; background:#f2f4f7; padding:40px; }
+    .box { max-width:700px; margin:0 auto; background:#fff; border-radius:12px;
+           padding:30px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    h1 { color:#1a2b6d; margin-top:0; }
+    input[type=text] { width:100%; padding:12px; font-size:16px;
+                        border:1px solid #ccd; border-radius:8px; margin-bottom:16px;
+                        box-sizing:border-box; }
+    button { background:#1a2b6d; color:#fff; border:none; padding:12px 24px;
+             border-radius:8px; font-size:16px; cursor:pointer; }
+    button:hover { background:#142257; }
+    .blad { color:#b00020; margin-top:14px; }
+
+    .sekcja { margin-top:26px; }
+    .sekcja h2 {
+      font-size:16px; background:#14547f; color:#fff;
+      padding:10px 14px; border-radius:6px 6px 0 0; margin:0;
+    }
+    .sekcja .tresc {
+      border:1px solid #e0e4e8; border-top:none;
+      border-radius:0 0 6px 6px; padding:14px 18px;
+    }
+    .sekcja .tresc dt { font-weight:bold; font-size:13px; margin-top:8px; color:#333; }
+    .sekcja .tresc dd { margin:0; font-size:14px; }
+    .info-pominieto { color:#888; font-style:italic; font-size:14px; }
+  </style>
+</head>
+<body>
+	<nav>
+        <a href="{{ url_for('index') }}">Sales Register</a> | 
+        <a href="{{ url_for('purchases') }}">Purchase Register</a> |
+        <a href="{{ url_for('kpir') }}">KPiR Dashboard</a> |
+        <a href="{{ url_for('search') }}">Wyszukiwanie (Search)</a> |
+        <a href="{{ url_for('contractors') }}">Baza Kontrahentów</a> |
+	<a href="{{ url_for('company_search.szukaj') }}">Wyszukiwanie (Search)</a>
+    </nav>
+    <hr>
+
+  <div class="box">
+    <h1>Szukaj według NIP</h1>
+    <form method="post">
+      <input type="text" name="numer" value="{{ wpisany_numer }}" placeholder="np. 1234563218">
+      <button type="submit">Szukaj</button>
+    </form>
+
+    {% if blad_glowny %}
+      <p class="blad">{{ blad_glowny }}</p>
+    {% endif %}
+
+    <!-- Biała Lista VAT -->
+    {% if wynik_vat %}
+      <div class="sekcja">
+        <h2>Biała Lista Podatników VAT</h2>
+        <div class="tresc">
+          <dl>
+            <dt>Nazwa</dt><dd>{{ wynik_vat.name }}</dd>
+            <dt>NIP</dt><dd>{{ wynik_vat.nip }}</dd>
+            <dt>REGON</dt><dd>{{ wynik_vat.regon }}</dd>
+            <dt>KRS</dt><dd>{{ wynik_vat.krs or '—' }}</dd>
+            <dt>Status VAT</dt><dd>{{ wynik_vat.statusVat }}</dd>
+            <dt>Adres</dt><dd>{{ wynik_vat.workingAddress or wynik_vat.residenceAddress }}</dd>
+            {% if wynik_vat.accountNumbers %}
+              <dt>Rachunki bankowe</dt>
+              <dd>{{ wynik_vat.accountNumbers | join(', ') }}</dd>
+            {% endif %}
+          </dl>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- KRS -->
+    {% if wynik_krs %}
+      <div class="sekcja">
+        <h2>Krajowy Rejestr Sądowy (KRS)</h2>
+        <div class="tresc">
+          <dl>
+            {% for klucz, wartosc in wynik_krs.items() %}
+              <dt>{{ klucz }}</dt><dd>{{ wartosc }}</dd>
+            {% endfor %}
+          </dl>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- GUS REGON -->
+    <div class="sekcja">
+      <h2>GUS REGON</h2>
+      <div class="tresc">
+        {% if wynik_regon %}
+          <dl>
+            {% for klucz, wartosc in wynik_regon.items() %}
+              <dt>{{ klucz }}</dt><dd>{{ wartosc }}</dd>
+            {% endfor %}
+          </dl>
+        {% elif info_regon %}
+          <p class="info-pominieto">Sekcja {{ info_regon }}. Aby ją aktywować, dodaj klucz REGON_API_KEY w pliku company_search.py.</p>
+        {% else %}
+          <p class="info-pominieto">Brak danych.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- CEIDG -->
+    <div class="sekcja">
+      <h2>CEIDG (jednoosobowa działalność gospodarcza)</h2>
+      <div class="tresc">
+        {% if wynik_ceidg %}
+          <dl>
+            {% for klucz, wartosc in wynik_ceidg.items() %}
+              <dt>{{ klucz }}</dt><dd>{{ wartosc }}</dd>
+            {% endfor %}
+          </dl>
+        {% elif info_ceidg %}
+          <p class="info-pominieto">Sekcja {{ info_ceidg }}. Aby ją aktywować, dodaj klucz CEIDG_API_KEY w pliku company_search.py.</p>
+        {% else %}
+          <p class="info-pominieto">Brak danych.</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

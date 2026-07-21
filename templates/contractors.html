@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounting App - Kontrahenci</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}">Sales Register</a> | 
+        <a href="{{ url_for('purchases') }}">Purchase Register</a> |
+        <a href="{{ url_for('kpir') }}">KPiR Dashboard</a> |
+        <a href="{{ url_for('search') }}">Wyszukiwanie (Search)</a> |
+        <a href="{{ url_for('contractors') }}">Baza Kontrahentów</a> |
+	<a href="{{ url_for('company_search.szukaj') }}">Wyszukiwanie (Search)</a>
+    </nav>
+    <hr>
+
+    <h1>Dodaj Kontrahenta (Add Contractor)</h1>
+    
+    <form method="POST">
+        <div>
+            <label for="name">Nazwa wykonawcy (Company Name):</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <br>
+        <div>
+            <label for="nip">NIP (TIN):</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="nip" name="nip" required>
+                <button type="button" id="fetch-btn" onclick="fetchCompanyData()" style="white-space: nowrap; background-color: #2563eb;">Pobierz z bazy (Fetch)</button>
+            </div>
+            <small id="api-status" style="color: var(--text-muted); display: block; margin-top: 5px;"></small>
+        </div>
+        <br>
+        <div>
+            <label for="ksef_id">KSeF ID (Opcjonalnie / Optional):</label>
+            <input type="text" id="ksef_id" name="ksef_id">
+        </div>
+        <br>
+        <button type="submit">Zapisz Kontrahenta (Save)</button>
+    </form>
+
+    <hr>
+
+    <h2>Baza Kontrahentów (Contractors Database)</h2>
+    
+  <div class="table-responsive">
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Nazwa wykonawcy</th>
+                <th>NIP</th>
+                <th>KSeF ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in contractors %}
+            <tr>
+                <td><strong>{{ row['name'] }}</strong></td>
+                <td>{{ row['nip'] }}</td>
+                <td>{{ row['ksef_id'] }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3">Brak kontrahentów. (No contractors found. Add one above!)</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+  </div>
+
+<script>
+        function fetchCompanyData() {
+            const nipInput = document.getElementById('nip').value;
+            const nameInput = document.getElementById('name');
+            const statusText = document.getElementById('api-status');
+            const btn = document.getElementById('fetch-btn');
+
+            if (!nipInput) {
+                statusText.innerText = "Najpierw wpisz NIP (Enter NIP first).";
+                statusText.style.color = "#dc2626";
+                return;
+            }
+
+            // Update UI to show loading state
+            statusText.innerText = "Szukanie w bazie Ministerstwa Finansów... (Searching...)";
+            statusText.style.color = "var(--text-muted)";
+            btn.innerText = "Szukanie...";
+            btn.disabled = true;
+
+            // Call the new Flask route
+            fetch(`/api/lookup-nip/${nipInput}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        nameInput.value = data.name;
+                        statusText.innerText = "Sukces! (Success!)";
+                        statusText.style.color = "#16a34a"; // Green
+                    } else {
+                        statusText.innerText = data.error;
+                        statusText.style.color = "#dc2626"; // Red
+                    }
+                })
+                .catch(error => {
+                    statusText.innerText = "Wystąpił błąd podczas łączenia z API.";
+                    statusText.style.color = "#dc2626";
+                })
+                .finally(() => {
+                    // Reset button state
+                    btn.innerText = "Pobierz z bazy (Fetch)";
+                    btn.disabled = false;
+                });
+        }
+    </script>
+
+</body>
+</html>

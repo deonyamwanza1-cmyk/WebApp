@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounting App - Add Purchase</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}">Sales Register</a> | 
+        <a href="{{ url_for('purchases') }}">Purchase Register</a> |
+        <a href="{{ url_for('kpir') }}">KPiR Dashboard</a> |
+        <a href="{{ url_for('search') }}">Wyszukiwanie (Search)</a> |
+        <a href="{{ url_for('contractors') }}">Baza Kontrahentów</a> |
+	<a href="{{ url_for('company_search.szukaj') }}">Wyszukiwanie (Search)</a>
+    </nav>
+    <hr>
+
+    <h1>Dodaj nowy wpis o zakupie</h1>
+    
+    <form method="POST">
+        <div>
+            <label for="document_number">Numer dokumentu:</label>
+            <input type="text" id="document_number" name="document_number" required>
+        </div>
+        <br>
+        <div>
+            <label for="nip">Kontrahent (Contractor):</label>
+            <select id="nip" name="nip" required>
+                <option value="" disabled selected>Wybierz kontrahenta (Select contractor)...</option>
+                {% for contractor in contractors %}
+                    <option value="{{ contractor['nip'] }}">{{ contractor['name'] }} (NIP: {{ contractor['nip'] }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <br>
+        <div>
+            <label for="document_date">Data dokumentu (YYYY/MM/DD):</label>
+            <!-- The pattern ensures 4 digits / 2 digits / 2 digits -->
+            <input type="text" id="document_date" name="document_date" 
+                   pattern="\d{4}/\d{2}/\d{2}" 
+                   title="Wymagany format to YYYY/MM/DD (np. 2026/01/15)" 
+                   placeholder="2026/01/15" required>
+        </div>
+        <br>
+        <div>
+            <label for="net_amount">Kwota netto (PLN):</label>
+            <input type="number" step="0.01" id="net_amount" name="net_amount" required>
+        </div>
+        <br>
+        <div>
+            <label for="vat_rate">Stawka VAT (VAT Rate):</label>
+            <select id="vat_rate" name="vat_rate" required>
+                <option value="0.23">23%</option>
+                <option value="0.08">8%</option>
+                <option value="0.05">5%</option>
+                <option value="0.00">0% / ZW (Zwolniony) / NP</option>
+            </select>
+        </div>
+        <br>
+        <div>
+            <label for="kpir_category">Kategoria KPiR:</label>
+            <select id="kpir_category" name="kpir_category">
+                <option value="Zakup materiałów">Zakup materiałów</option>
+                <option value="Koszty dodatkowe">Koszty dodatkowe</option>
+                <option value="Koszty wynagrodzeń">Koszty wynagrodzeń</option>
+                <option value="Pozostałe wydatki">Pozostałe wydatki</option>
+            </select>
+        </div>
+        <br>
+        <button type="submit">Zapisz (Save Record)</button>
+    </form>
+
+    <hr>
+
+    <h2>Rejestr zakupów (Purchase Register)</h2>
+    
+  <div class="table-responsive">
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Numer dokumentu</th>
+                <th>NIP</th>
+                <th>Data dokumentu</th>
+                <th>Kwota netto</th>
+                <th>Stawka VAT</th>
+                <th>Kwota VAT</th>
+                <th>Kwota brutto</th>
+                <th>Kategoria KPiR</th>
+		<th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in purchases %}
+            <tr>
+                <td>{{ row['document_number'] }}</td>
+                <td>{{ row['nip'] }}</td>
+                <td>{{ row['document_date'] }}</td>
+                <td>{{ row['net_amount'] | round(2) }} PLN</td>
+                <td>{{ (row['vat_rate'] * 100) | round(0) }}%</td>
+                <td>{{ row['vat_amount'] | round(2) }} PLN</td>
+                <td>{{ row['gross_amount'] | round(2) }} PLN</td>
+                <td>{{ row['kpir_category'] }}</td>
+		<td>
+    <form action="{{ url_for('delete_purchase', id=row['id']) }}" method="POST" style="box-shadow: none; padding: 0; display: inline;">
+        <button type="submit" style="background-color: #dc3545; padding: 5px 10px; font-size: 12px;" onclick="return confirm('Czy na pewno chcesz usunąć ten rekord?');">Usuń</button>
+    </form>
+</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8">No purchase records found. Add one above!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+  </div>
+</body>
+</html>

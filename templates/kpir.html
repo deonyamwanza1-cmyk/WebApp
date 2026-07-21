@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounting App - KPiR Summary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}">Sales Register</a> | 
+        <a href="{{ url_for('purchases') }}">Purchase Register</a> |
+        <a href="{{ url_for('kpir') }}">KPiR Dashboard</a> |
+        <a href="{{ url_for('search') }}">Wyszukiwanie (Search)</a> |
+        <a href="{{ url_for('contractors') }}">Baza Kontrahentów</a> |
+	<a href="{{ url_for('company_search.szukaj') }}">Wyszukiwanie (Search)</a>
+    </nav>
+    <hr>
+
+    <h1>Księga Przychodów i Rozchodów (KPiR Summary)</h1>
+    
+  <div class="table-responsive">
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th class="kpir-header-green">Miesiąc (Month)</th>
+                <th class="kpir-header-green">Sprzedaż towarów</th>
+                <th class="kpir-header-green">Pozostałe przychody</th>
+                <th class="kpir-header-green">Całkowity przychód (Revenue)</th>
+                <th class="kpir-header-orange">Zakup materiałów</th>
+                <th class="kpir-header-orange">Koszty dodatkowe</th>
+                <th class="kpir-header-orange">Koszty wynagrodzeń</th>
+                <th class="kpir-header-orange">Pozostałe wydatki</th>
+                <th class="kpir-header-orange">Koszty całkowite (Costs)</th>
+                <th style="background-color: #e0e0e0; color: black !important;">Profit / Loss</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in kpir_months %}
+                {% set total_revenue = row['sales_goods'] + row['other_rev'] %}
+                {% set total_costs = row['materials'] + row['incidental_costs'] + row['payroll'] + row['other_expenses'] %}
+                {% set profit = total_revenue - total_costs %}
+                
+                <tr {% if row['type'] == 'cumulative' %}style="background-color: #f9f9f9;"{% endif %}>
+                    <!-- Apply the blue class to the first column (Months) -->
+                    <td class="kpir-month-col"><strong>{{ row['name'] }}</strong></td>
+                    
+                    <td>{{ row['sales_goods'] | round(2) }}</td>
+                    <td>{{ row['other_rev'] | round(2) }}</td>
+                    <td class="kpir-revenue">{{ total_revenue | round(2) }}</td>
+                    
+                    <td>{{ row['materials'] | round(2) }}</td>
+                    <td>{{ row['incidental_costs'] | round(2) }}</td>
+                    <td>{{ row['payroll'] | round(2) }}</td>
+                    <td>{{ row['other_expenses'] | round(2) }}</td>
+                    <td class="kpir-cost">{{ total_costs | round(2) }}</td>
+                    
+                    <td><strong>{{ profit | round(2) }}</strong></td>
+                </tr>
+            {% endfor %}
+            
+            {% set total_rev = grand_total['sales_goods'] + grand_total['other_rev'] %}
+            {% set total_cst = grand_total['materials'] + grand_total['incidental_costs'] + grand_total['payroll'] + grand_total['other_expenses'] %}
+            {% set final_profit = total_rev - total_cst %}
+            <tr style="background-color: #d4edda; font-weight: bold; border-top: 3px solid #0f5a7a;">
+                <td class="kpir-month-col"><span style="color: black;">{{ grand_total['name'] }}</span></td>
+                <td>{{ grand_total['sales_goods'] | round(2) }}</td>
+                <td>{{ grand_total['other_rev'] | round(2) }}</td>
+                <td style="background-color: #c3e6cb;">{{ total_rev | round(2) }}</td>
+                <td>{{ grand_total['materials'] | round(2) }}</td>
+                <td>{{ grand_total['incidental_costs'] | round(2) }}</td>
+                <td>{{ grand_total['payroll'] | round(2) }}</td>
+                <td>{{ grand_total['other_expenses'] | round(2) }}</td>
+                <td style="background-color: #f5c6cb;">{{ total_cst | round(2) }}</td>
+                <td>{{ final_profit | round(2) }}</td>
+            </tr>
+        </tbody>
+    </table>
+  </div>
+</body>
+</html>
