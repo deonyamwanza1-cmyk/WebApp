@@ -38,20 +38,19 @@
   </style>
 </head>
 <body>
-	<nav>
-  <a href="{{ url_for('index') }}">Rejestr sprzedaży</a> |
-  <a href="{{ url_for('purchases') }}">Rejestr zakupów</a> |
-  <a href="{{ url_for('kpir') }}">KPiR</a> |
-  <a href="{{ url_for('search') }}">Przeszukaj rekordy</a> |
-  <a href="{{ url_for('contractors') }}">Baza Kontrahentów</a> |
-  <a href="{{ url_for('company_search.szukaj') }}">Wyszukiwanie NIP</a>
-</nav>
-    <hr>
+  <nav>
+    <a href="{{ url_for('index') }}">Rejestr sprzedaży</a> |
+    <a href="{{ url_for('purchases') }}">Rejestr zakupów</a> |
+    <a href="{{ url_for('kpir') }}">KPiR</a> |
+    <a href="{{ url_for('search') }}">Przeszukaj rekordy</a> |
+    <a href="{{ url_for('contractors') }}">Baza Kontrahentów</a> |
+    <a href="{{ url_for('company_search.szukaj') }}">Wyszukiwanie NIP</a>
+  </nav>
 
   <div class="box">
-    <h1>Szukaj według NIP</h1>
-    <form method="post">
-      <input type="text" name="numer" value="{{ wpisany_numer }}" placeholder="np. 1234563218">
+    <h1>Wyszukiwarka podmiotów (NIP)</h1>
+    <form method="post" class="search-row">
+      <input type="text" name="numer" value="{{ wpisany_numer }}" placeholder="Wprowadź NIP (np. 9462575811)" required>
       <button type="submit">Szukaj</button>
     </form>
 
@@ -62,16 +61,16 @@
     <!-- Biała Lista VAT (Active Card) -->
     {% if wynik_vat %}
       <div class="results-card">
-        <h2 class="results-header">White List of VAT Taxpayers</h2>
+        <h2 class="results-header">Biała lista podatników VAT</h2>
         <div class="results-grid">
           
           <div class="data-group full-width">
-            <span class="data-label">Name</span>
+            <span class="data-label">Nazwa podmiotu</span>
             <span class="data-value">{{ wynik_vat.name }}</span>
           </div>
 
           <div class="data-group">
-            <span class="data-label">Tax Identification Number (NIP)</span>
+            <span class="data-label">NIP</span>
             <span class="data-value">{{ wynik_vat.nip }}</span>
           </div>
 
@@ -81,23 +80,23 @@
           </div>
 
           <div class="data-group">
-            <span class="data-label">National Court Register (KRS)</span>
+            <span class="data-label">Numer KRS</span>
             <span class="data-value">{{ wynik_vat.krs or '—' }}</span>
           </div>
 
           <div class="data-group">
-            <span class="data-label">VAT Status</span>
+            <span class="data-label">Status VAT</span>
             <span class="status-badge">{{ wynik_vat.statusVat }}</span>
           </div>
 
           <div class="data-group full-width">
-            <span class="data-label">Registered Address</span>
+            <span class="data-label">Adres siedziby</span>
             <span class="data-value">{{ wynik_vat.workingAddress or wynik_vat.residenceAddress }}</span>
           </div>
 
           {% if wynik_vat.accountNumbers %}
           <div class="data-group full-width">
-            <span class="data-label">Bank Accounts ({{ wynik_vat.accountNumbers|length }})</span>
+            <span class="data-label">Rachunki bankowe ({{ wynik_vat.accountNumbers|length }})</span>
             <div class="bank-accounts-box">
               {{ wynik_vat.accountNumbers | join(', ') }}
             </div>
@@ -111,7 +110,7 @@
     <!-- KRS Data Render (If Available) -->
     {% if wynik_krs %}
       <div class="results-card">
-        <h2 class="results-header">National Court Register (KRS) Data</h2>
+        <h2 class="results-header">Dane z Krajowego Rejestru Sądowego (KRS)</h2>
         <div class="results-grid">
             {% for klucz, wartosc in wynik_krs.items() %}
               <div class="data-group {% if wartosc|length > 50 %}full-width{% endif %}">
@@ -127,8 +126,8 @@
     {% if not wynik_regon %}
       <div class="omitted-section">
         <div>
-          <h3 class="omitted-title">Central Statistical Office REGON</h3>
-          <p class="omitted-text">This section is omitted (no API key configured).</p>
+          <h3 class="omitted-title">Rejestr REGON (GUS)</h3>
+          <p class="omitted-text">Ta sekcja została pominięta (brak skonfigurowanego klucza API).</p>
         </div>
       </div>
     {% endif %}
@@ -137,8 +136,8 @@
     {% if not wynik_ceidg %}
       <div class="omitted-section">
         <div>
-          <h3 class="omitted-title">CEIDG (Sole Proprietorship)</h3>
-          <p class="omitted-text">This section is omitted (no API key configured).</p>
+          <h3 class="omitted-title">Baza CEIDG (Działalność gospodarcza)</h3>
+          <p class="omitted-text">Ta sekcja została pominięta (brak skonfigurowanego klucza API).</p>
         </div>
       </div>
     {% endif %}
