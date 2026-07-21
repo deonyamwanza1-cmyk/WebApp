@@ -14,7 +14,11 @@ THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(THIS_FOLDER, 'accounting.db')
 
 def get_db_connection():
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    db_url = os.environ.get('DATABASE_URL')
+    if not db_url:
+        raise RuntimeError("DATABASE_URL environment variable is missing in Render settings.")
+    
+    conn = psycopg2.connect(db_url)
     return conn
 
 
