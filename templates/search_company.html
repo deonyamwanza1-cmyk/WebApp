@@ -135,12 +135,16 @@
     </div>
   {% endif %}
 
-  <!-- CEIDG Omitted State -->
+  <!-- CEIDG Omitted State / Error / Not Found -->
   {% if not wynik_ceidg %}
     <div class="omitted-section">
       <div>
         <h3 class="omitted-title">Baza CEIDG (Działalność gospodarcza)</h3>
-        <p class="omitted-text">Ta sekcja została pominięta (brak skonfigurowanego klucza API).</p>
+        {% if info_ceidg %}
+          <p class="omitted-text">{{ info_ceidg }}</p>
+        {% else %}
+          <p class="omitted-text">Brak wyników w CEIDG (To nie jest jednoosobowa działalność lub NIP jest błędny).</p>
+        {% endif %}
       </div>
     </div>
   {% endif %}

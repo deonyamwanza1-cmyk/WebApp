@@ -64,7 +64,7 @@ company_bp = Blueprint(
 # KONFIGURACJA - wpisz tutaj swoje klucze, gdy je otrzymasz
 # ======================================================================
 REGON_API_KEY = os.environ.get("REGON_API_KEY", "")   # np. "a1b2c3d4e5f6g7h8i9j0"  -> zostaw puste, by pominac
-CEIDG_API_KEY = os.environ.get("CEIDG_API_KEY", "")   # np. "eyJhbGciOiJI..."        -> zostaw puste, by pominac
+CEIDG_API_KEY = os.environ.get("CEIDG_API_KEY", "").strip().replace('"', '')   # np. "eyJhbGciOiJI..."        -> zostaw puste, by pominac
 REGON_IS_PRODUCTION = False  # ustaw True po otrzymaniu klucza produkcyjnego
 # ======================================================================
 
@@ -226,7 +226,8 @@ def pobierz_z_ceidg(nip: str):
         return None, "brak polaczenia z CEIDG"
 
     if odp.status_code != 200:
-        return None, None
+        # Pass the actual HTTP error code to the UI instead of failing silently
+        return None, f"Błąd API CEIDG (Odmowa dostępu / HTTP {odp.status_code}). Sprawdź poprawność klucza."
 
     dane = odp.json().get("firmy", [])
     if not dane:
