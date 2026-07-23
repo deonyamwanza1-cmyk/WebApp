@@ -225,9 +225,12 @@ def pobierz_z_ceidg(nip: str):
     except requests.RequestException:
         return None, "brak polaczenia z CEIDG"
 
-    if odp.status_code != 200:
-        # Pass the actual HTTP error code to the UI instead of failing silently
-        return None, f"Błąd API CEIDG (Odmowa dostępu / HTTP {odp.status_code}). Sprawdź poprawność klucza."
+    if odp.status_code == 404:
+        return None, "Brak wyników w CEIDG (Firma nie istnieje lub nie jest to jednoosobowa działalność)."
+    elif odp.status_code in (401, 403):
+        return None, "Błąd autoryzacji: Niewłaściwy klucz API CEIDG."
+    elif odp.status_code != 200:
+        return None, f"Błąd API CEIDG (HTTP {odp.status_code})."
 
     dane = odp.json().get("firmy", [])
     if not dane:
