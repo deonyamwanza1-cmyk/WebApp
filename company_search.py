@@ -54,6 +54,9 @@ from datetime import date
 import requests
 from flask import Blueprint, render_template, request
 
+import psycopg2
+import psycopg2.extras
+
 company_bp = Blueprint(
     "company_search",
     __name__,
@@ -210,33 +213,50 @@ def pobierz_z_regon(nip: str):
 
 
 # ----------------------------------------------------------------------
-# 4) CEIDG - wymaga klucza API
+# 4) CEIDG - Pobieranie danych z lokalnej bazy PostgreSQL
 # ----------------------------------------------------------------------
 
 def pobierz_z_ceidg(nip: str):
-    """Zwraca (dane_slownik, blad). Pomija, jesli brak klucza."""
-    if not CEIDG_API_KEY:
-        return None, "pominieto (brak klucza API CEIDG)"
+    """
+    Wyszukuje dane w lokalnej tabeli `ceidg_registry` utworzonej w bazie PostgreSQL.
+    Zwraca (dane_slownik, blad).
+    """
+    clean_nip = wyczysc_numer(nip)
+    
+    db_url = os.environ.get('DATABASE_URL')
+    if not db_url:
+        return None, "Brak połączenia z bazą danych (DATABASE_URL)."
 
-    url = "https://dane.biznes.gov.pl/api/ceidg/v2/firmy"
-    headers = {"Authorization": f"Bearer {CEIDG_API_KEY}"}
     try:
-        odp = requests.get(url, params={"nip": nip}, headers=headers, timeout=10)
-    except requests.RequestException:
-        return None, "brak polaczenia z CEIDG"
+        conn = psycopg2.connect(db_url)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        
+        # Zapytanie do stworzonej tabeli CEIDG
+        cur.execute("SELECT * FROM ceidg_registry WHERE nip = %s", (clean_nip,))
+        row = cur.fetchone()
+        
+        cur.close()
+        conn.close()
 
-    if odp.status_code == 404:
-        return None, "Brak wyników w CEIDG (Firma nie istnieje lub nie jest to jednoosobowa działalność)."
-    elif odp.status_code in (401, 403):
-        return None, "Błąd autoryzacji: Niewłaściwy klucz API CEIDG."
-    elif odp.status_code != 200:
-        return None, f"Błąd API CEIDG (HTTP {odp.status_code})."
+        if not row:
+            return None, "Brak wyników w lokalnej bazie CEIDG."
 
-    dane = odp.json().get("firmy", [])
-    if not dane:
-        return None, None
+        # Mapowanie rekordu z bazy do struktury oczekiwanej przez szablony HTML i API
+        result = {
+            "nazwa": row.get("nazwa_pod") or "",
+            "status": row.get("status") or "",
+            "miejscowosc": row.get("miejscowosc") or "",
+            "regon": row.get("regon") or "",
+            "wlasciciel": {
+                "imie": row.get("imie") or "",
+                "nazwisko": row.get("nazwisko") or "",
+                "nip": row.get("nip") or ""
+            }
+        }
+        return result, None
 
-    return dane[0], None
+    except Exception as e:
+        return None, f"Błąd zapytania do bazy CEIDG: {e}"
 
 
 # ----------------------------------------------------------------------
