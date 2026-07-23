@@ -105,6 +105,36 @@
     </div>
   {% endif %}
 
+<!-- CEIDG Data Render (If Available) -->
+  {% if wynik_ceidg %}
+    <div class="results-card">
+      <h2 class="results-header">Dane z CEIDG (Działalność Gospodarcza)</h2>
+      <div class="results-grid">
+        
+        <div class="data-group full-width">
+          <span class="data-label">Nazwa firmy</span>
+          <span class="data-value">{{ wynik_ceidg.nazwa }}</span>
+        </div>
+
+        <div class="data-group">
+          <span class="data-label">Właściciel</span>
+          <span class="data-value">{{ wynik_ceidg.wlasciciel.imie }} {{ wynik_ceidg.wlasciciel.nazwisko }}</span>
+        </div>
+
+        <div class="data-group">
+          <span class="data-label">NIP</span>
+          <span class="data-value">{{ wynik_ceidg.wlasciciel.nip }}</span>
+        </div>
+
+        <div class="data-group">
+          <span class="data-label">Status</span>
+          <span class="status-badge">{{ wynik_ceidg.status }}</span>
+        </div>
+        
+      </div>
+    </div>
+  {% endif %}
+
   <!-- CEIDG Omitted State -->
   {% if not wynik_ceidg %}
     <div class="omitted-section">

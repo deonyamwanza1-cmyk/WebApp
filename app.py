@@ -5,6 +5,7 @@ import os
 from datetime import datetime, date
 import requests
 from company_search import company_bp
+from company_search import pobierz_z_ceidg
 
 app = Flask(__name__)
 app.register_blueprint(company_bp)
@@ -418,15 +419,32 @@ def lookup_nip(nip):
     url = f"https://wl-api.mf.gov.pl/api/search/nip/{clean_nip}?date={today}"
 
     try:
+        # 1. Try Biała Lista (White List) first
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()
-            # Check if the API returned a valid subject
             if data.get('result') and data['result'].get('subject'):
                 company_name = data['result']['subject']['name']
                 return jsonify({"success": True, "name": company_name})
+        
+        # 2. Fallback to CEIDG if White List yields no results
+        ceidg_data, error = pobierz_z_ceidg(clean_nip)
+        
+        if ceidg_data:
+            firma = ceidg_data.get('nazwa', '')
+            owner = ceidg_data.get('wlasciciel', {})
+            imie = owner.get('imie', '')
+            nazwisko = owner.get('nazwisko', '')
+            
+            # Try to use company name, fallback to First/Last name
+            company_name = firma if firma else f"{imie} {nazwisko}".strip()
+            
+            if company_name:
+                return jsonify({"success": True, "name": company_name})
 
-        return jsonify({"success": False, "error": "Nie znaleziono (Not found or invalid NIP)."})
+        # 3. If both fail, return an error
+        return jsonify({"success": False, "error": "Nie znaleziono w Białej Liście ani CEIDG. Sprawdź NIP lub klucz API."})
+        
     except Exception as e:
         return jsonify({"success": False, "error": "Błąd serwera (Server error)."})
 
