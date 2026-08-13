@@ -130,6 +130,7 @@ def index():
     # Get current year and month
     current_year = datetime.now().strftime('%Y')
     current_month = datetime.now().strftime('%m')
+    current_date = datetime.now().strftime('%Y/%m/%d')
     
     # Count how many sales records exist for the current month
     cur.execute(
@@ -146,7 +147,7 @@ def index():
     conn.close()
 
     # Pass the records AND the generated number to the HTML template
-    return render_template('index.html', sales=sales_records, next_doc_num=next_doc_num)
+    return render_template('index.html', sales=sales_records, next_doc_num=next_doc_num, current_date=current_date)
 
 
 @app.route('/purchases', methods=('GET', 'POST'))
@@ -209,8 +210,10 @@ def purchases():
 
     conn.close()
 
+    current_date = datetime.now().strftime('%Y/%m/%d')
+
     # Pass the records to the purchases HTML template
-    return render_template('purchases.html', purchases=purchases_records, contractors=contractors_list)
+    return render_template('purchases.html', purchases=purchases_records, contractors=contractors_list, current_date=current_date)
 
 
 @app.route('/kpir')
