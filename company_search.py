@@ -66,7 +66,7 @@ company_bp = Blueprint(
 # ======================================================================
 # KONFIGURACJA - wpisz tutaj swoje klucze, gdy je otrzymasz
 # ======================================================================
-REGON_API_KEY = os.environ.get("REGON_API_KEY", "ad9acd0fb4c748d193e4")   # np. "a1b2c3d4e5f6g7h8i9j0"  -> zostaw puste, by pominac
+REGON_API_KEY = os.environ.get("REGON_API_KEY", "")   # np. "a1b2c3d4e5f6g7h8i9j0"  -> zostaw puste, by pominac
 CEIDG_API_KEY = os.environ.get("CEIDG_API_KEY", "").strip().replace('"', '')   # np. "eyJhbGciOiJI..."        -> zostaw puste, by pominac
 REGON_IS_PRODUCTION = True  # ustaw True po otrzymaniu klucza produkcyjnego
 # ======================================================================
