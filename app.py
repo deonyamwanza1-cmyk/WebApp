@@ -34,7 +34,7 @@ def init_db():
             nip VARCHAR(50),
             document_date VARCHAR(50),
             net_amount REAL,
-            vat_rate REAL,
+            vat_rate VARCHAR(10),
             vat_amount REAL,
             gross_amount REAL,
             kpir_category VARCHAR(100)
@@ -49,7 +49,7 @@ def init_db():
             nip VARCHAR(50),
             document_date VARCHAR(50),
             net_amount REAL,
-            vat_rate REAL,
+            vat_rate VARCHAR(10),
             vat_amount REAL,
             gross_amount REAL,
             kpir_category VARCHAR(100)
@@ -450,3 +450,14 @@ def lookup_nip(nip):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+@app.route('/migrate-vat')
+def migrate_vat():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('ALTER TABLE sales ALTER COLUMN vat_rate TYPE VARCHAR(10);')
+    cur.execute('ALTER TABLE purchases ALTER COLUMN vat_rate TYPE VARCHAR(10);')
+    conn.commit()
+    cur.close()
+    conn.close()
+    return "Database updated successfully! You can now delete this route from app.py."
