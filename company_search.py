@@ -313,6 +313,39 @@ def szukaj():
         info_ceidg=info_ceidg,
     )
 
+@company_bp.route("/szukaj-krs", methods=["GET", "POST"])
+def szukaj_krs():
+    wpisany_krs = ""
+    blad_glowny = None
+    wynik_krs = None
+
+    if request.method == "POST":
+        wpisany_krs = request.form.get("numer", "")
+        # Remove any spaces or special characters
+        krs = wyczysc_numer(wpisany_krs)
+
+        if len(krs) > 10:
+            blad_glowny = "Numer KRS nie może mieć więcej niż 10 cyfr."
+        elif not krs:
+             blad_glowny = "Wprowadź poprawny numer KRS."
+        else:
+            # Query the existing KRS function
+            surowe_krs, blad = pobierz_z_krs(krs)
+            
+            if blad:
+                blad_glowny = blad
+            elif not surowe_krs:
+                blad_glowny = "Nie znaleziono podmiotu o podanym numerze KRS."
+            else:
+                # Extract and format the data
+                wynik_krs = wyciagnij_dane_krs(surowe_krs)
+
+    return render_template(
+        "search_krs.html",
+        wpisany_krs=wpisany_krs,
+        blad_glowny=blad_glowny,
+        wynik_krs=wynik_krs
+    )
 
 if __name__ == "__main__":
     from flask import Flask
