@@ -206,14 +206,34 @@ def purchases():
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cur.execute('SELECT nip, name FROM contractors ORDER BY name ASC')
     contractors_list = cur.fetchall()
+    
+    # --- AUTO-NUMBERING & DATE LOGIC ---
+    current_year = datetime.now().strftime('%Y')
+    current_month = datetime.now().strftime('%m')
+    current_date = f"{current_year}/{current_month}/{datetime.now().strftime('%d')}"
+    
+    # Count how many purchase records exist for the current month
+    cur.execute(
+        "SELECT COUNT(*) as count FROM purchases WHERE document_date LIKE %s", 
+        (f"{current_year}/{current_month}/%",)
+    )
+    month_count = cur.fetchone()['count']
+    
+    # Generate the next document number (using FZ for Faktura Zakupu)
+    next_doc_num = f"FZ {month_count + 1}/{current_month}/{current_year}"
+    # --------------------------------
+    
     cur.close()
-
     conn.close()
 
-    current_date = datetime.now().strftime('%Y/%m/%d')
-
-    # Pass the records to the purchases HTML template
-    return render_template('purchases.html', purchases=purchases_records, contractors=contractors_list, current_date=current_date)
+    # Pass the records, the date, AND the generated number to the template
+    return render_template(
+        'purchases.html', 
+        purchases=purchases_records, 
+        contractors=contractors_list, 
+        current_date=current_date,
+        next_doc_num=next_doc_num
+    )
 
 
 @app.route('/kpir')
