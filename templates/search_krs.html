@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wyszukiwarka KRS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav>
+    <a href="{{ url_for('index') }}">Rejestr sprzedaży</a> |
+    <a href="{{ url_for('purchases') }}">Rejestr zakupów</a> |
+    <a href="{{ url_for('kpir') }}">KPiR</a> |
+    <a href="{{ url_for('search') }}">Przeszukaj rekordy</a> |
+    <a href="{{ url_for('contractors') }}">Baza Kontrahentów</a> |
+    <a href="{{ url_for('company_search.szukaj') }}">Wyszukiwanie NIP</a> |
+    <a href="{{ url_for('company_search.szukaj_krs') }}">Wyszukiwanie KRS</a>
+  </nav>
+
+  <h1>Wyszukiwarka podmiotów (KRS)</h1>
+  
+  <form method="post">
+    <div>
+      <label for="numer">Wprowadź numer KRS:</label>
+      <!-- The backend zfills with leading zeros automatically, so the user can just type the numbers -->
+      <input type="text" id="numer" name="numer" value="{{ wpisany_krs }}" placeholder="np. 0000123456" required>
+    </div>
+    <br>
+    <button type="submit">Szukaj w KRS</button>
+  </form>
+
+  {% if blad_glowny %}
+    <div class="blad">{{ blad_glowny }}</div>
+  {% endif %}
+
+  <!-- KRS Data Render -->
+  {% if wynik_krs %}
+    <div class="results-card">
+      <h2 class="results-header">Dane z Krajowego Rejestru Sądowego (KRS)</h2>
+      <div class="results-grid">
+          {% for klucz, wartosc in wynik_krs.items() %}
+            <div class="data-group {% if wartosc|length > 50 %}full-width{% endif %}">
+              <span class="data-label">{{ klucz }}</span>
+              <span class="data-value">{{ wartosc }}</span>
+            </div>
+          {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+</body>
+</html>
