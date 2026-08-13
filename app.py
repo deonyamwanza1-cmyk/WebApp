@@ -84,24 +84,29 @@ def index():
         nip = request.form['nip']
         date = request.form['document_date']
         net = float(request.form['net_amount'])
-        vat_rate = float(request.form['vat_rate'])
+        vat_rate_str = request.form['vat_rate'] 
         category = request.form['kpir_category']
 
         try:
-            # 1. Validate Date Format (will throw ValueError if it fails)
+            # 1. Validate Date
             valid_date = datetime.strptime(date, '%Y/%m/%d')
 
-            # 2. Validate VAT Rate
-            allowed_vat_rates = [0.23, 0.08, 0.05, 0.00]
-            if vat_rate not in allowed_vat_rates:
+            # 2. Validate VAT Rate including our new text strings
+            allowed_vat_rates = ["0.23", "0.08", "0.05", "0.00", "ZW", "NP"]
+            if vat_rate_str not in allowed_vat_rates:
                 raise ValueError("Niedozwolona stawka VAT (Invalid VAT rate).")
 
         except ValueError as e:
-            # If validation fails, abort the save and return an error message to the browser
             return f"Data Validation Error: {e}. Please use your browser's back button and try again.", 400
 
-        # Calculate VAT amount and Gross amount
-        vat_amount = net * vat_rate
+        # 3. Determine mathematical multiplier for VAT
+        if vat_rate_str in ["0.00", "ZW", "NP"]:
+            vat_multiplier = 0.0
+        else:
+            vat_multiplier = float(vat_rate_str)
+
+        # Calculate VAT amount and Gross amount using the multiplier
+        vat_amount = net * vat_multiplier
         gross = net + vat_amount
 
         # Insert the new record using a standard cursor
@@ -109,7 +114,7 @@ def index():
         cur.execute('''
             INSERT INTO sales (document_number, nip, document_date, net_amount, vat_rate, vat_amount, gross_amount, kpir_category)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        ''', (doc_num, nip, date, net, vat_rate, vat_amount, gross, category))
+        ''', (doc_num, nip, date, net, vat_rate_str, vat_amount, gross, category))
         conn.commit()
         cur.close()
 
@@ -137,24 +142,29 @@ def purchases():
         nip = request.form['nip']
         date = request.form['document_date']
         net = float(request.form['net_amount'])
-        vat_rate = float(request.form['vat_rate'])
+        vat_rate_str = request.form['vat_rate'] 
         category = request.form['kpir_category']
 
         try:
-            # 1. Validate Date Format (will throw ValueError if it fails)
+            # 1. Validate Date
             valid_date = datetime.strptime(date, '%Y/%m/%d')
 
-            # 2. Validate VAT Rate
-            allowed_vat_rates = [0.23, 0.08, 0.05, 0.00]
-            if vat_rate not in allowed_vat_rates:
+            # 2. Validate VAT Rate including our new text strings
+            allowed_vat_rates = ["0.23", "0.08", "0.05", "0.00", "ZW", "NP"]
+            if vat_rate_str not in allowed_vat_rates:
                 raise ValueError("Niedozwolona stawka VAT (Invalid VAT rate).")
 
         except ValueError as e:
-            # If validation fails, abort the save and return an error message to the browser
             return f"Data Validation Error: {e}. Please use your browser's back button and try again.", 400
 
-        # Calculate VAT amount and Gross amount
-        vat_amount = net * vat_rate
+        # 3. Determine mathematical multiplier for VAT
+        if vat_rate_str in ["0.00", "ZW", "NP"]:
+            vat_multiplier = 0.0
+        else:
+            vat_multiplier = float(vat_rate_str)
+
+        # Calculate VAT amount and Gross amount using the multiplier
+        vat_amount = net * vat_multiplier
         gross = net + vat_amount
 
         # Insert the new record into the purchases table
@@ -162,7 +172,7 @@ def purchases():
         cur.execute('''
             INSERT INTO purchases (document_number, nip, document_date, net_amount, vat_rate, vat_amount, gross_amount, kpir_category)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        ''', (doc_num, nip, date, net, vat_rate, vat_amount, gross, category))
+        ''', (doc_num, nip, date, net, vat_rate_str, vat_amount, gross, category))
         conn.commit()
         cur.close()
 
@@ -450,14 +460,3 @@ def lookup_nip(nip):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-@app.route('/migrate-vat')
-def migrate_vat():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('ALTER TABLE sales ALTER COLUMN vat_rate TYPE VARCHAR(10);')
-    cur.execute('ALTER TABLE purchases ALTER COLUMN vat_rate TYPE VARCHAR(10);')
-    conn.commit()
-    cur.close()
-    conn.close()
-    return "Database updated successfully! You can now delete this route from app.py."

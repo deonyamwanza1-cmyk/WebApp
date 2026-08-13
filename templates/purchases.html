@@ -56,8 +56,8 @@
     <option value="0.08">8%</option>
     <option value="0.05">5%</option>
     <option value="0.00">0%</option>
-    <option value="0.00">ZW (Zwolniony)</option>
-    <option value="0.00">NP (Nie podlega)</option>
+    <option value="ZW">ZW (Zwolniony)</option>
+    <option value="NP">NP (Nie podlega)</option>
 </select>
         </div>
         <br>
@@ -100,7 +100,13 @@
                 <td>{{ row['nip'] }}</td>
                 <td>{{ row['document_date'] }}</td>
                 <td>{{ row['net_amount'] | round(2) }} PLN</td>
-                <td>{{ (row['vat_rate'] * 100) | round(0) }}%</td>
+                <td>
+    {% if row['vat_rate'] in ['ZW', 'NP'] %}
+        {{ row['vat_rate'] }}
+    {% else %}
+        {{ (row['vat_rate'] | float * 100) | round(0) }}%
+    {% endif %}
+</td>
                 <td>{{ row['vat_amount'] | round(2) }} PLN</td>
                 <td>{{ row['gross_amount'] | round(2) }} PLN</td>
                 <td>{{ row['kpir_category'] }}</td>
