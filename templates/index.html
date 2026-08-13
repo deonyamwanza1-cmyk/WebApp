@@ -119,5 +119,14 @@
     </table>
   </div>
 
+<script>
+    // Prevent mouse wheel from changing number inputs
+    document.addEventListener("wheel", function(event) {
+        if (document.activeElement.type === "number") {
+            document.activeElement.blur();
+        }
+    });
+</script>
+
 </body>
 </html>
