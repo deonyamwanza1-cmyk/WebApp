@@ -125,11 +125,28 @@ def index():
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cur.execute('SELECT * FROM sales ORDER BY id DESC')
     sales_records = cur.fetchall()
+    
+    # --- NEW AUTO-NUMBERING LOGIC ---
+    # Get current year and month
+    current_year = datetime.now().strftime('%Y')
+    current_month = datetime.now().strftime('%m')
+    
+    # Count how many sales records exist for the current month
+    cur.execute(
+        "SELECT COUNT(*) as count FROM sales WHERE document_date LIKE %s", 
+        (f"{current_year}/{current_month}/%",)
+    )
+    month_count = cur.fetchone()['count']
+    
+    # Generate the next document number (e.g., FV 1/08/2026)
+    next_doc_num = f"FV {month_count + 1}/{current_month}/{current_year}"
+    # --------------------------------
+    
     cur.close()
     conn.close()
 
-    # Pass the records to the HTML template
-    return render_template('index.html', sales=sales_records)
+    # Pass the records AND the generated number to the HTML template
+    return render_template('index.html', sales=sales_records, next_doc_num=next_doc_num)
 
 
 @app.route('/purchases', methods=('GET', 'POST'))
