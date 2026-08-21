@@ -7,6 +7,10 @@ from datetime import datetime, date
 import requests
 from company_search import company_bp
 from company_search import pobierz_z_ceidg
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # This line forces Python to read the .env file!
 
 app = Flask(__name__)
 app.register_blueprint(company_bp)
