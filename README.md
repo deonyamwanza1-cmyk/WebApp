@@ -1,7 +1,3 @@
-Here is a comprehensive, professional `README.md` template tailored exactly to the source code and features of your application. You can copy and paste this directly into your GitHub repository.
-
----
-
 # Polish Tax Ledger & Contractor Management (KPiR)
 
 A robust, full-stack web application designed to streamline Polish accounting (Księga Przychodów i Rozchodów - KPiR) operations. Built with Flask and PostgreSQL, this application automates sales and purchase registries, dynamically calculates VAT, and features a highly fault-tolerant government API integration to instantly retrieve and verify company details.
@@ -90,7 +86,3 @@ python app.py
 **Deon Tanaka Nyamwanza**
 
 * GitHub: [@deonyamwanza1-cmyk](https://www.google.com/search?q=https://github.com/deonyamwanza1-cmyk)
-
----
-
-Does this structure hit all the right notes for you, or would you like to add a placeholder section where you can drop in screenshots of the user interface before you send it to your boss?
