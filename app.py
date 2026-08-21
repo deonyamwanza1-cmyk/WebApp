@@ -1,3 +1,4 @@
+from company_search import company_bp, pobierz_z_ceidg, pobierz_z_regon
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import psycopg2
 import psycopg2.extras
@@ -477,23 +478,22 @@ def lookup_nip(nip):
                 company_name = data['result']['subject']['name']
                 return jsonify({"success": True, "name": company_name})
         
-        # 2. Fallback to CEIDG if White List yields no results
+        # 2. NEW FALLBACK: Try GUS REGON API for VAT-exempt entities (Sp. z o.o., NGOs)
+        regon_data, regon_error = pobierz_z_regon(clean_nip)
+        if regon_data and regon_data.get('Nazwa'):
+            return jsonify({"success": True, "name": regon_data['Nazwa']})
+
+        # 3. Final Fallback to CEIDG (Local DB for JDGs)
         ceidg_data, error = pobierz_z_ceidg(clean_nip)
-        
         if ceidg_data:
             firma = ceidg_data.get('nazwa', '')
             owner = ceidg_data.get('wlasciciel', {})
-            imie = owner.get('imie', '')
-            nazwisko = owner.get('nazwisko', '')
-            
-            # Try to use company name, fallback to First/Last name
-            company_name = firma if firma else f"{imie} {nazwisko}".strip()
+            company_name = firma if firma else f"{owner.get('imie', '')} {owner.get('nazwisko', '')}".strip()
             
             if company_name:
                 return jsonify({"success": True, "name": company_name})
 
-        # 3. If both fail, return an error
-        return jsonify({"success": False, "error": "Nie znaleziono w Białej Liście ani CEIDG. Sprawdź NIP lub klucz API."})
+        return jsonify({"success": False, "error": "Nie znaleziono w Białej Liście, REGON ani CEIDG."})
         
     except Exception as e:
         return jsonify({"success": False, "error": "Błąd serwera (Server error)."})
