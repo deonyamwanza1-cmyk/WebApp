@@ -96,6 +96,21 @@
     </div>
   {% endif %}
 
+<!-- GUS REGON Data Render (Active Card) -->
+  {% if wynik_regon %}
+    <div class="results-card">
+      <h2 class="results-header">Rejestr REGON (GUS)</h2>
+      <div class="results-grid">
+          {% for klucz, wartosc in wynik_regon.items() %}
+            <div class="data-group {% if wartosc|length > 50 %}full-width{% endif %}">
+              <span class="data-label">{{ klucz }}</span>
+              <span class="data-value">{{ wartosc }}</span>
+            </div>
+          {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
   <!-- GUS REGON Omitted State / Error -->
   {% if not wynik_regon %}
     <div class="omitted-section">
