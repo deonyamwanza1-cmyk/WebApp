@@ -96,12 +96,18 @@
     </div>
   {% endif %}
 
-  <!-- GUS REGON Omitted State -->
+  <!-- GUS REGON Omitted State / Error -->
   {% if not wynik_regon %}
     <div class="omitted-section">
       <div>
         <h3 class="omitted-title">Rejestr REGON (GUS)</h3>
-        <p class="omitted-text">Ta sekcja została pominięta (brak skonfigurowanego klucza API).</p>
+        <p class="omitted-text">
+          {% if info_regon %}
+            {{ info_regon }}
+          {% else %}
+            Brak wyników w bazie REGON.
+          {% endif %}
+        </p>
       </div>
     </div>
   {% endif %}
